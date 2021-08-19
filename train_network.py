@@ -7,6 +7,8 @@ from torch import nn
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 from torch.utils.data import DataLoader, Dataset
+from torchsummary import summary
+
 from network import Classifier
 from tqdm import tqdm
 
@@ -23,7 +25,10 @@ class SHLDataset(Dataset):
                 feature_path = os.path.join(path, position, '{}_features.csv'.format(dataset_type))
                 label_path = os.path.join(path, position, '{}_labels.csv'.format(dataset_type))
 
-                features = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, 30:60]
+                # features = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, :75]
+                acc_features = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, :15]
+                other_features = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, 30:60]
+                features = [np.append(item[0], item[1]) for item in zip(acc_features, other_features)]
                 labels = np.loadtxt(label_path, delimiter=',', dtype=np.float32)[1:]  # The first column is index
 
                 # features = np.array([np.expand_dims(data, 0) for data in features])
@@ -37,7 +42,10 @@ class SHLDataset(Dataset):
             feature_path = os.path.join(path, 'test_features.csv')
             label_path = os.path.join(path, 'test_labels.csv')
 
-            self.x_data = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, 30:60]
+            # self.x_data = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, :75]
+            acc_features = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, :15]
+            other_features = np.loadtxt(feature_path, delimiter=',', dtype=np.float32)[1:, 30:75]
+            self.x_data = [np.append(item[0], item[1]) for item in zip(acc_features, other_features)]
             # self.x_data = np.array([np.expand_dims(data, 0) for data in self.x_data])
             self.y_data = np.loadtxt(label_path, delimiter=',', dtype=np.float32)[1:]  # The first column is index
         else:
@@ -70,7 +78,6 @@ def show_train_hist(hist, show=False, save=False, path='Train_hist.png'):
     plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(10))
     plt.subplot(3, 1, 2)
     plt.plot(x, y2, '.-')
-    plt.xlabel('epochs')
     plt.ylabel('train accuracy')
     plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(10))
     plt.subplot(3, 1, 3)
@@ -90,13 +97,14 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = torch.device('cpu')
 
-    network = Classifier(30, 100, 8).to(device)
+    network = Classifier(45, 100, 8).to(device)
+    summary(network, (1, 45))
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(network.parameters(), lr=0.0001)
     # optimizer = torch.optim.Adam(network.parameters(), lr=0.00001) # weight_decay： L2 penalty
-    train_dataset = SHLDataset(dataset_type='train', positions=['Torso'])
+    train_dataset = SHLDataset(dataset_type='train', positions=['Hips'])
     # train_dataset = SHLDataset(dataset_type='train')
-    validation_dataset = SHLDataset(dataset_type='validation', positions=['Torso'])
+    validation_dataset = SHLDataset(dataset_type='validation', positions=['Hips'])
     # validation_dataset = SHLDataset(dataset_type='validation')
 
     train_loader = DataLoader(dataset=train_dataset, batch_size=128, shuffle=True)
@@ -165,4 +173,4 @@ if __name__ == '__main__':
     print("Avg per epoch ptime: %.2f." % (np.mean(train_hist['per_epoch_ptimes'])))
     show_train_hist(train_hist, show=True, path='train_hist_gyr_lacc.png')
 
-    torch.save(network, 'models/model_conv_gyr_lacc_50epoches_Torso.pkl')
+    torch.save(network, 'models/model_conv_acc_gyr_lacc_50epoches_Hips.pkl')

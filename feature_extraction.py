@@ -158,6 +158,19 @@ class Feature():
 
         return features
 
+    def extract_press_feature(self, prefix, file='Pressure.txt'):
+        mean = self.get_mean(file)
+        std = self.get_std(file)
+        mcr = self.get_mcr(file)
+        kurtosis = self.get_kurtosis(file)
+        skew = self.get_skew(file)
+
+        features = [list(item) for item in zip(mean, std, mcr, kurtosis, skew)]
+        press_features_df = pd.DataFrame(data=features)
+        press_features_df.to_csv('{}_features_press.csv'.format(prefix), encoding='utf-8', index=False)
+
+        return features
+
     def create_feature_files(self, prefix):
         # 3 features
         acc_features = self.__extract_features__('Acc_x.txt', 'Acc_y.txt', 'Acc_z.txt')
@@ -196,64 +209,6 @@ class Feature():
 
         total_features_df.to_csv('{}_features.csv'.format(prefix), encoding='utf-8', index=False)
 
-    # def load_features(self):
-    #     mean_acc_x = self.get_mean('Acc_x.txt')
-    #     std_acc_x = self.get_std('Acc_x.txt')
-    #     mcr_acc_x = self.get_mcr('Acc_x.txt')
-    #     kurtosis_acc_x = self.get_kurtosis('Acc_x.txt')
-    #     skew_acc_x = self.get_skew('Acc_x.txt')
-    #
-    #     mean_acc_y = self.get_mean('Acc_y.txt')
-    #     std_acc_y = self.get_std('Acc_y.txt')
-    #     mcr_acc_y = self.get_mcr('Acc_y.txt')
-    #     kurtosis_acc_y = self.get_kurtosis('Acc_y.txt')
-    #     skew_acc_y = self.get_skew('Acc_y.txt')
-    #
-    #     mean_acc_z = self.get_mean('Acc_z.txt')
-    #     std_acc_z = self.get_std('Acc_z.txt')
-    #     mcr_acc_z = self.get_mcr('Acc_z.txt')
-    #     kurtosis_acc_z = self.get_kurtosis('Acc_z.txt')
-    #     skew_acc_z = self.get_skew('Acc_z.txt')
-    #
-    #     acc_features = [list(item) for item in
-    #                     zip(mean_acc_x, std_acc_x, mcr_acc_x, kurtosis_acc_x, skew_acc_x,
-    #                         mean_acc_y, std_acc_y, mcr_acc_y, kurtosis_acc_y, skew_acc_y,
-    #                         mean_acc_z, std_acc_z, mcr_acc_z, kurtosis_acc_z, skew_acc_z)]
-    #
-    #     mean_gra_x = self.get_mean('Gra_x.txt')
-    #     std_acc_x = self.get_std('Acc_x.txt')
-    #     mcr_acc_x = self.get_mcr('Acc_x.txt')
-    #     kurtosis_acc_x = self.get_kurtosis('Acc_x.txt')
-    #     skew_acc_x = self.get_skew('Acc_x.txt')
-    #
-    #     mean_acc_y = self.get_mean('Acc_y.txt')
-    #     std_acc_y = self.get_std('Acc_y.txt')
-    #     mcr_acc_y = self.get_mcr('Acc_y.txt')
-    #     kurtosis_acc_y = self.get_kurtosis('Acc_y.txt')
-    #     skew_acc_y = self.get_skew('Acc_y.txt')
-    #
-    #     mean_acc_z = self.get_mean('Acc_z.txt')
-    #     std_acc_z = self.get_std('Acc_z.txt')
-    #     mcr_acc_z = self.get_mcr('Acc_z.txt')
-    #     kurtosis_acc_z = self.get_kurtosis('Acc_z.txt')
-    #     skew_acc_z = self.get_skew('Acc_z.txt')
-    #
-    #     mean_gyr_x = self.get_mean('Gyr_x.txt')
-    #     std_gyr_x = self.get_std('Gyr_x.txt')
-    #     mean_gyr_y = self.get_mean('Gyr_y.txt')
-    #     std_gyr_y = self.get_std('Gyr_y.txt')
-    #     mean_gyr_z = self.get_mean('Gyr_z.txt')
-    #     std_gyr_z = self.get_std('Gyr_z.txt')
-    #
-    #     labels = self.load_labels()
-    #     features = [list(item) for item in
-    #                 zip(mean_x, std_x, mcr_x, kurtosis_x, skew_x, mean_y, std_y, mcr_y, kurtosis_y, skew_y, mean_z,
-    #                     std_z,
-    #                     mcr_z, kurtosis_z, skew_z, mean_gyr_x, std_gyr_x, mean_gyr_y, std_gyr_y, mean_gyr_z, std_gyr_z,
-    #                     labels)]
-    #
-    #     return features
-
 
 if __name__ == '__main__':
     # Train feature extraction
@@ -262,15 +217,16 @@ if __name__ == '__main__':
         os.mkdir(train_path)
 
     # # Train Bag
-    # train_bag_path = os.path.join(train_path, 'Bag/')
-    # if not os.path.exists(train_bag_path):
-    #     os.mkdir(train_bag_path)
-    # f1 = Feature('challenge-2019-train_bag/train/Bag')
-    # f1.create_feature_files('{}train'.format(train_bag_path))
-    #
-    # train_labels = np.array(f1.load_labels())
-    # train_labels_df = pd.DataFrame(data=train_labels)
-    # train_labels_df.to_csv('{}train_labels.csv'.format(train_bag_path), encoding='utf-8', index=False)
+    train_bag_path = os.path.join(train_path, 'Bag/')
+    if not os.path.exists(train_bag_path):
+        os.mkdir(train_bag_path)
+    f1 = Feature('challenge-2019-train_bag/train/Bag')
+    # f1.extract_press_feature('{}train'.format(train_bag_path))
+    f1.create_feature_files('{}train'.format(train_bag_path))
+
+    train_labels = np.array(f1.load_labels())
+    train_labels_df = pd.DataFrame(data=train_labels)
+    train_labels_df.to_csv('{}train_labels.csv'.format(train_bag_path), encoding='utf-8', index=False)
     #
     # # Train Hand
     # train_hand_path = os.path.join(train_path, 'Hand/')
@@ -285,15 +241,15 @@ if __name__ == '__main__':
 
     # Train Hips
     # The 121217th data in gra has nan
-    train_hips_path = os.path.join(train_path, 'Hips/')
-    if not os.path.exists(train_hips_path):
-        os.mkdir(train_hips_path)
-    f1 = Feature('challenge-2019-train_hips/train/Hips')
-    f1.create_feature_files('{}train'.format(train_hips_path))
-
-    train_labels = np.array(f1.load_labels())
-    train_labels_df = pd.DataFrame(data=train_labels)
-    train_labels_df.to_csv('{}train_labels.csv'.format(train_hips_path), encoding='utf-8', index=False)
+    # train_hips_path = os.path.join(train_path, 'Hips/')
+    # if not os.path.exists(train_hips_path):
+    #     os.mkdir(train_hips_path)
+    # f1 = Feature('challenge-2019-train_hips/train/Hips')
+    # f1.create_feature_files('{}train'.format(train_hips_path))
+    #
+    # train_labels = np.array(f1.load_labels())
+    # train_labels_df = pd.DataFrame(data=train_labels)
+    # train_labels_df.to_csv('{}train_labels.csv'.format(train_hips_path), encoding='utf-8', index=False)
     #
     # # Train Torso
     # train_torso_path = os.path.join(train_path, 'Torso/')
@@ -306,16 +262,17 @@ if __name__ == '__main__':
     # train_labels_df = pd.DataFrame(data=train_labels)
     # train_labels_df.to_csv('{}train_labels.csv'.format(train_torso_path), encoding='utf-8', index=False)
     #
-    # # Validation feature extraction
-    # validation_path = 'validation-features/'
-    # if not os.path.exists(validation_path):
-    #     os.mkdir(validation_path)
-    #
-    # # Validation Bag
-    # validation_bag_path = os.path.join(validation_path, 'Bag/')
-    # if not os.path.exists(validation_bag_path):
-    #     os.mkdir(validation_bag_path)
-    # f2 = Feature('challenge-2020-validation/validation/Bag')
+    # Validation feature extraction
+    validation_path = 'validation-features/'
+    if not os.path.exists(validation_path):
+        os.mkdir(validation_path)
+
+    # Validation Bag
+    validation_bag_path = os.path.join(validation_path, 'Bag/')
+    if not os.path.exists(validation_bag_path):
+        os.mkdir(validation_bag_path)
+    f2 = Feature('challenge-2020-validation/validation/Bag')
+    f2.extract_press_feature('{}validation'.format(validation_bag_path))
     # f2.create_feature_files('{}validation'.format(validation_bag_path))
     #
     # validation_labels = np.array(f2.load_labels())

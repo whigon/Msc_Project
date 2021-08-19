@@ -59,9 +59,16 @@ class Classifier(nn.Module):
         self.fc1 = nn.Conv1d(1, 16, kernel_size=5, stride=5)  #
         self.fc2 = nn.Conv1d(16, 64, kernel_size=3, stride=3)  # 3*64
 
+        # # Net for frequency features
+        # self.fc1 = nn.Conv1d(1, 16, kernel_size=3, stride=3)  #
+        # self.fc2 = nn.Sequential(
+        #     nn.Conv1d(16, 64, kernel_size=3, stride=3),
+        #     nn.ReLU(),
+        #     nn.Conv1d(64, 128, kernel_size=3, stride=3))
+
         self.classifier = nn.Sequential(
-            # nn.Linear(128 * 5, 512),
-            nn.Linear(64 * 2, 1024),
+            nn.Linear(64 * 3, 1024),
+            # nn.Linear(64 * 4, 1024),
             nn.ReLU(True),
             nn.Dropout(),
             nn.Linear(1024, 512),
@@ -84,15 +91,6 @@ class Classifier(nn.Module):
         out = self.classifier(out)
         out = self.tanh(out)
         out = F.softmax(out, dim=1)
-
-        # out = self.block_1(x)
-        # out = self.block_2(out)
-        # out = self.fc3(out)
-        # out = self.relu(out)
-        # out = out.view(out.size(0), -1)
-        # out = self.classifier(out)
-        # out = self.tanh(out)
-        # out = F.softmax(out, dim=1)
 
         return out
 

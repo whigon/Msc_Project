@@ -1,8 +1,6 @@
-import random
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import svm
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 from feature_extraction import Feature
@@ -46,7 +44,7 @@ def train_on_all(data):
     # SVM on Validation dataset
     f = Feature('challenge-2020-validation/validation/Bag')
     validation_labels = np.array(f.load_labels())
-    validation_data = np.loadtxt('validation-features/Bag/validation_features_ori.csv', delimiter=',', dtype=np.float32)[1:]
+    validation_data = np.loadtxt('validation-features/Bag/validation_features_press.csv', delimiter=',', dtype=np.float32)[1:]
     # validation_data = np.loadtxt('validation_features_gyr.csv', delimiter=',', dtype=np.float32)[1:, :10]
     test_p = model.predict(validation_data)
     print('Validation Accuracy', np.mean(test_p == validation_labels))
@@ -57,7 +55,7 @@ def train_on_all(data):
 if __name__ == '__main__':
     f = Feature('challenge-2019-train_bag/train/Bag')
     labels = np.array(f.load_labels())
-    x = np.loadtxt('train-features/Bag/train_features_ori.csv', delimiter=',', dtype=np.float32)[1:]
+    x = np.loadtxt('train-features/Bag/train_features_press.csv', delimiter=',', dtype=np.float32)[1:]
     # x = np.loadtxt('train_features_gyr.csv', delimiter=',', dtype=np.float32)[1:, :10]
 
     data = list(np.c_[x, labels])
